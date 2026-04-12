@@ -13,8 +13,13 @@ import AIGuidance from "./pages/AIGuidance";
 import MyProjects from "./pages/MyProjects";
 import IoTDevices from "./pages/IoTDevices";
 import IPLearning from "./pages/IPLearning";
-import  ClubHub  from "./pages/ClubHub";
+import ClubHub from "./pages/ClubHub";
 import SettingsPage from "./pages/Settings";
+import About from "./pages/About";
+import PledgeWall from "./pages/PledgeWall";
+import ClubActivities from "./pages/ClubActivities";
+import RegistrationGuide from "./pages/RegistrationGuide";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +53,12 @@ function AppRoutes() {
       <Route path="/dashboard/ip-learning" element={<ProtectedRoute><IPLearning /></ProtectedRoute>} />
       <Route path="/dashboard/club-hub" element={<ProtectedRoute><ClubHub /></ProtectedRoute>} />
       <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+      <Route path="/dashboard/pledge-wall" element={<ProtectedRoute><PledgeWall /></ProtectedRoute>} />
+      <Route path="/dashboard/activities" element={<ProtectedRoute><ClubActivities /></ProtectedRoute>} />
+      <Route path="/dashboard/registration" element={<ProtectedRoute><RegistrationGuide /></ProtectedRoute>} />
+      <Route path="/dashboard/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+      <Route path="/about" element={<About />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
