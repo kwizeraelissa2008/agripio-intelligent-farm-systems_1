@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,34 +7,32 @@
 /* AGRIPIO Design System — Intelligent Agriculture from Soil to Market */
 /* All colors MUST be HSL */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @layer base {
   :root {
-    /* LIGHT MODE — Sunny farm greens */
-    --background: 120 25% 97%;
-    --foreground: 145 30% 12%;
+    /* LIGHT MODE — Clean white + green */
+    --background: 0 0% 97%;
+    --foreground: 145 30% 10%;
 
-    --card: 120 20% 99%;
-    --card-foreground: 145 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 145 30% 10%;
 
-    --popover: 120 20% 99%;
-    --popover-foreground: 145 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 145 30% 10%;
 
-    /* Emerald primary */
-    --primary: 145 65% 36%;
+    /* Dark green primary */
+    --primary: 152 36% 17%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary surfaces */
-    --secondary: 120 15% 93%;
-    --secondary-foreground: 145 30% 12%;
+    --secondary: 152 15% 93%;
+    --secondary-foreground: 152 36% 12%;
 
     /* Muted */
-    --muted: 120 10% 90%;
-    --muted-foreground: 120 8% 45%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent emerald */
-    --accent: 151 60% 42%;
+    /* Accent — mid green for highlights */
+    --accent: 152 36% 25%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -42,15 +42,15 @@
     /* Borders */
     --border: 120 10% 85%;
     --input: 120 10% 90%;
-    --ring: 145 65% 36%;
+    --ring: 152 36% 17%;
 
     --radius: 1rem;
 
     /* Agripio custom tokens */
-    --emerald: 145 65% 36%;
-    --emerald-accent: 151 60% 42%;
-    --emerald-glow: 145 65% 36%;
-    --emerald-dim: 145 40% 55%;
+    --emerald: 152 36% 17%;
+    --emerald-accent: 152 36% 25%;
+    --emerald-glow: 152 36% 17%;
+    --emerald-dim: 152 20% 40%;
     --warning: 45 90% 48%;
     --alert: 0 80% 55%;
     --earth: 14 24% 34%;
@@ -65,24 +65,24 @@
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(120 25% 97%) 0%, hsl(145 30% 94%) 50%, hsl(120 25% 97%) 100%);
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.95), hsl(145 20% 97% / 0.8));
-    --gradient-emerald: linear-gradient(135deg, hsl(145 65% 36%), hsl(151 60% 42%));
-    --gradient-emerald-glow: linear-gradient(135deg, hsl(145 65% 36% / 0.12), hsl(151 60% 42% / 0.05));
+    --gradient-emerald: linear-gradient(135deg, hsl(152 36% 17%), hsl(152 36% 25%));
+    --gradient-emerald-glow: linear-gradient(135deg, hsl(152 36% 17% / 0.12), hsl(152 36% 25% / 0.05));
 
     /* Shadows */
-    --shadow-emerald: 0 4px 20px hsl(145 65% 36% / 0.15);
-    --shadow-emerald-strong: 0 8px 30px hsl(145 65% 36% / 0.25);
+    --shadow-emerald: 0 4px 20px hsl(152 36% 17% / 0.18);
+    --shadow-emerald-strong: 0 8px 30px hsl(152 36% 17% / 0.28);
     --shadow-card: 0 2px 12px hsl(0 0% 0% / 0.06);
-    --shadow-card-hover: 0 8px 24px hsl(0 0% 0% / 0.1), 0 0 20px hsl(145 65% 36% / 0.05);
+    --shadow-card-hover: 0 8px 24px hsl(0 0% 0% / 0.1), 0 0 20px hsl(152 36% 17% / 0.06);
 
     /* Sidebar */
     --sidebar-background: 120 20% 99%;
     --sidebar-foreground: 120 10% 35%;
-    --sidebar-primary: 145 65% 36%;
+    --sidebar-primary: 152 36% 17%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 120 15% 93%;
-    --sidebar-accent-foreground: 145 30% 12%;
+    --sidebar-accent-foreground: 152 36% 12%;
     --sidebar-border: 120 10% 88%;
-    --sidebar-ring: 145 65% 36%;
+    --sidebar-ring: 152 36% 17%;
   }
 
   .dark {
