@@ -158,8 +158,9 @@ export default function AIGuidance() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-emerald)' }}>
-              <Sparkles className="w-5 h-5" style={{ color: 'hsl(var(--primary-foreground))' }} />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #1b3a2a, #1b3a2a)' }}>
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold">{t('chatWithGuide')}</h1>

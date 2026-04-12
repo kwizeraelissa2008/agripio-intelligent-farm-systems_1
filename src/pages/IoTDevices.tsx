@@ -14,8 +14,7 @@ import { analyzePlant, type PlantAnalysis } from '@/lib/ai';
 const jitter = (base: number, range: number) => +(base + (Math.random() - 0.5) * range).toFixed(1);
 
 export default function IoTDevices() {
-  const { language } = useApp();
-  const isRw = language === 'rw';
+  const { t } = useApp();
 
   // Bluetooth
   const [btStatus, setBtStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
@@ -158,24 +157,22 @@ export default function IoTDevices() {
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Cpu className="w-5 h-5" style={{ color: 'hsl(var(--emerald))' }} />
-            {isRw ? 'Ikoranabuhanga rya IoT' : 'IoT Devices'}
+            {t('iotTitle')}
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isRw ? 'Huza, suzuma, kandi ukurikirane' : 'Connect, scan, and monitor your farm'}
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('iotDesc')}</p>
         </div>
 
         {/* Device Status Overview */}
         <div className="grid grid-cols-2 gap-3">
           <div className="glass-card p-4 text-center">
             <div className="text-2xl mb-1">{btStatus === 'connected' ? '🟢' : '🔴'}</div>
-            <div className="text-sm font-semibold">{btStatus === 'connected' ? 'Connected' : 'Offline'}</div>
-            <div className="text-xs text-muted-foreground">{btDevice || 'No device'}</div>
+            <div className="text-sm font-semibold">{btStatus === 'connected' ? t('connected') : t('offline2')}</div>
+            <div className="text-xs text-muted-foreground">{btDevice || t('noDevice')}</div>
           </div>
           <div className="glass-card p-4 text-center">
             <div className="text-2xl mb-1">{arduinoConnected ? '📡' : '📴'}</div>
-            <div className="text-sm font-semibold">{arduinoConnected ? 'Syncing' : 'Not synced'}</div>
-            <div className="text-xs text-muted-foreground">Arduino data</div>
+            <div className="text-sm font-semibold">{arduinoConnected ? t('syncing') : t('notSynced')}</div>
+            <div className="text-xs text-muted-foreground">{t('arduinoData')}</div>
           </div>
         </div>
 
@@ -183,7 +180,7 @@ export default function IoTDevices() {
         <div className="glass-card p-5">
           <h2 className="font-semibold mb-3 flex items-center gap-2">
             <Bluetooth className="w-4 h-4" style={{ color: 'hsl(var(--sky))' }} />
-            {isRw ? 'Bluetooth' : 'Bluetooth Connection'}
+            {t('bluetoothConn')}
           </h2>
           <div className="flex items-center gap-4">
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${btStatus === 'connected' ? 'animate-pulse' : ''}`}
@@ -196,17 +193,17 @@ export default function IoTDevices() {
             </div>
             <div className="flex-1">
               <div className="text-sm font-medium">
-                {btStatus === 'connected' ? `✅ ${btDevice}` : btStatus === 'connecting' ? '🔄 Pairing...' : 'No device paired'}
+                {btStatus === 'connected' ? `✅ ${btDevice}` : btStatus === 'connecting' ? `🔄 ${t('pairing')}` : t('noDevicePaired')}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {btStatus === 'connected' ? 'Receiving sensor data' : 'Tap to pair with AgriPio sensor'}
+                {btStatus === 'connected' ? t('receivingData') : t('tapToPair')}
               </p>
             </div>
             {btStatus !== 'connected' && (
               <button onClick={connectBluetooth} disabled={btStatus === 'connecting'}
                 className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
                 style={{ background: 'hsl(var(--sky) / 0.15)', color: 'hsl(var(--sky))', border: '1px solid hsl(var(--sky) / 0.3)' }}>
-                {btStatus === 'connecting' ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRw ? 'Huza' : 'Pair')}
+                {btStatus === 'connecting' ? <Loader2 className="w-4 h-4 animate-spin" /> : t('pair')}
               </button>
             )}
           </div>
@@ -216,11 +213,9 @@ export default function IoTDevices() {
         <div className="glass-card p-5">
           <h2 className="font-semibold mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4" style={{ color: 'hsl(var(--emerald))' }} />
-            {isRw ? 'Suzuma Igihingwa' : 'AI Plant Scanner'}
+            {t('aiPlantScanner')}
           </h2>
-          <p className="text-xs text-muted-foreground mb-3">
-            {isRw ? 'Fata ifoto, AI izagisuzuma (Lovable AI)' : 'Capture a photo — real AI analysis powered by Lovable AI'}
-          </p>
+          <p className="text-xs text-muted-foreground mb-3">{t('scannerDesc')}</p>
           
           <canvas ref={canvasRef} className="hidden" />
           
@@ -228,7 +223,7 @@ export default function IoTDevices() {
             <button onClick={startScanner}
               className="w-full py-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{ background: 'hsl(var(--emerald) / 0.12)', color: 'hsl(var(--emerald))', border: '1px solid hsl(var(--emerald) / 0.3)' }}>
-              <Camera className="w-5 h-5" /> {isRw ? '📸 Fungura Kamera' : '📸 Open Camera'}
+              <Camera className="w-5 h-5" /> {t('openCamera')}
             </button>
           ) : (
             <div className="space-y-3">
@@ -237,7 +232,7 @@ export default function IoTDevices() {
                 {scanning && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60">
                     <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'hsl(var(--emerald))' }} />
-                    <p className="text-sm mt-2 text-white">{isRw ? 'AI irimo gusuzuma...' : 'AI analyzing plant...'}</p>
+                    <p className="text-sm mt-2 text-white">{t('aiAnalyzing')}</p>
                   </div>
                 )}
                 {scanResult && (
@@ -245,11 +240,11 @@ export default function IoTDevices() {
                     style={{ background: 'hsl(var(--card) / 0.95)' }}>
                     <span className="text-5xl mb-3">{statusIcon(scanResult.status)}</span>
                     <h3 className="text-lg font-bold mb-1" style={{ color: statusColor(scanResult.status) }}>{scanResult.status}</h3>
-                    <p className="text-xs text-muted-foreground mb-1">Confidence: {scanResult.confidence}%</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t('confidence')}: {scanResult.confidence}%</p>
                     <p className="text-sm text-muted-foreground mb-3">{scanResult.diagnosis}</p>
                     {scanResult.advice.length > 0 && (
                       <div className="text-left w-full">
-                        <p className="text-xs font-semibold mb-1">Actions:</p>
+                        <p className="text-xs font-semibold mb-1">{t('actions')}</p>
                         {scanResult.advice.map((a, i) => (
                           <p key={i} className="text-xs text-muted-foreground">• {a}</p>
                         ))}
@@ -275,7 +270,7 @@ export default function IoTDevices() {
                   <button onClick={handleScan}
                     className="flex-1 py-3 rounded-xl text-sm font-semibold"
                     style={{ background: 'hsl(var(--emerald) / 0.15)', color: 'hsl(var(--emerald))', border: '1px solid hsl(var(--emerald) / 0.3)' }}>
-                    🔍 {isRw ? 'Suzuma na AI' : 'Analyze with AI'}
+                  🔍 {t('analyzeWithAi')}
                   </button>
                 )}
                 <button onClick={closeScanner}
@@ -292,7 +287,7 @@ export default function IoTDevices() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold flex items-center gap-2">
               <Activity className="w-4 h-4" style={{ color: 'hsl(var(--gold))' }} />
-              {isRw ? 'Arduino Data' : 'Arduino Data Flow'}
+              {t('arduinoData')}
             </h2>
             <button onClick={() => setArduinoConnected(!arduinoConnected)}
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-105"
@@ -301,14 +296,14 @@ export default function IoTDevices() {
                 color: arduinoConnected ? 'hsl(var(--emerald))' : 'hsl(var(--muted-foreground))',
                 border: `1px solid ${arduinoConnected ? 'hsl(var(--emerald) / 0.3)' : 'hsl(var(--border))'}`,
               }}>
-              {arduinoConnected ? <><CheckCircle className="w-3.5 h-3.5" /> Synced</> : <><RefreshCw className="w-3.5 h-3.5" /> Sync</>}
+              {arduinoConnected ? <><CheckCircle className="w-3.5 h-3.5" /> {t('synced')}</> : <><RefreshCw className="w-3.5 h-3.5" /> {t('sync')}</>}
             </button>
           </div>
 
           {!arduinoConnected ? (
             <div className="text-center py-8">
               <Cpu className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">{isRw ? 'Kanda Sync kugira ngo uhuze Arduino' : 'Tap Sync to connect your Arduino device'}</p>
+              <p className="text-sm text-muted-foreground">{t('tapSync')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -316,7 +311,7 @@ export default function IoTDevices() {
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <Droplets className="w-4 h-4" style={{ color: 'hsl(var(--sky))' }} />
-                    <span className="text-sm font-medium">{isRw ? 'Ubuhehere' : 'Moisture'}</span>
+                    <span className="text-sm font-medium">{t('moisture')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-xl font-bold">{moisture}</span>
