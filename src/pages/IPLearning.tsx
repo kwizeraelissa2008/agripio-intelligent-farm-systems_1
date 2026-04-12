@@ -3,6 +3,7 @@
  * © 2026 AgriPio Team
  */
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,9 +12,9 @@ import {
   BookOpen, ChevronRight, CheckCircle, Play, Upload,
   Award, ArrowLeft, HelpCircle, Trophy, Star, Video, Users, Lightbulb, Loader2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
+import { getProgress, saveProgress as saveLocalProgress } from '@/lib/localStorage';
+import confetti from 'canvas-confetti';
 
 interface QuizQuestion { question: string; options: string[]; correct: number; }
 interface Lesson {
@@ -92,7 +93,7 @@ export default function IPLearning() {
   const quizScore = lesson.quiz.reduce((acc, q, i) => acc + (quizAnswers[i] === q.correct ? 1 : 0), 0);
   const quizPassed = quizSubmitted && quizScore >= Math.ceil(lesson.quiz.length * 0.6);
 
-  // Fetch real videos
+  // Fetch real videos + load saved progress from localStorage
   useEffect(() => {
     const fetchVideos = async () => {
       setLoadingVideos(true);
@@ -101,25 +102,46 @@ export default function IPLearning() {
       setLoadingVideos(false);
     };
     fetchVideos();
-  }, []);
+    if (user) setCompletedLessons(getProgress(user.id));
+  }, [user]);
 
-  const markComplete = () => {
-    if (!completedLessons.includes(lesson.id)) setCompletedLessons(prev => [...prev, lesson.id]);
+  const saveProgress = async (moduleId: string) => {
+    if (!user || completedLessons.includes(moduleId)) return;
+    saveLocalProgress(user.id, moduleId);
+    setCompletedLessons(prev => [...prev, moduleId]);
+  };
+
+  const markComplete = async () => {
+    await saveProgress(lesson.id);
     if (currentLesson < lessons.length - 1) {
       setCurrentLesson(prev => prev + 1);
       setShowQuiz(false); setShowReason(false); setQuizAnswers({}); setQuizSubmitted(false);
     }
   };
 
-  const handleQuizSubmit = () => {
+  const handleQuizSubmit = async () => {
     setQuizSubmitted(true);
     if (quizScore >= Math.ceil(lesson.quiz.length * 0.6)) {
-      if (!completedLessons.includes(lesson.id)) setCompletedLessons(prev => [...prev, lesson.id]);
+      await saveProgress(lesson.id);
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 }, colors: ['#00c853', '#ffd700', '#2196f3'] });
     }
   };
 
-  // Real video upload to Supabase Storage
+  const handleDeleteVideo = async (videoId: string, videoUrl: string) => {
+    if (!user) return;
+    // Extract storage path from URL
+    const urlParts = videoUrl.split('/videos/');
+    const storagePath = urlParts[1];
+    if (storagePath) {
+      await supabase.storage.from('videos').remove([storagePath]);
+    }
+    const { error } = await supabase.from('community_videos').delete().eq('id', videoId).eq('user_id', user.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success('Video deleted');
+      setCommunityVideos(prev => prev.filter(v => v.id !== videoId));
+    }
+  };
   const handleVideoUpload = async () => {
     if (!uploadTitle.trim() || !selectedFile || !user) return;
     setUploading(true);
@@ -147,7 +169,7 @@ export default function IPLearning() {
     if (insertError) {
       toast.error(insertError.message);
     } else {
-      toast.success(language === 'rw' ? 'Video yashyizweho neza! 🎉' : 'Video uploaded successfully! 🎉');
+      toast.success(t('videoCopyright') + ' 🎉');
       confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 }, colors: ['#00c853', '#69f0ae'] });
       setUploadTitle(''); setUploadDesc(''); setSelectedFile(null);
       // Refresh videos
@@ -198,10 +220,10 @@ export default function IPLearning() {
               </h2>
               <div className="space-y-3">
                 <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
-                  placeholder={language === 'rw' ? "Umutwe wa video (urugero: 'Inkuru yanjye ya IP')" : "Video title (e.g., 'My IP Success Story')"}
+                  placeholder={t('uploadVideo') + ' title'}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none bg-secondary border border-border" />
                 <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
-                  placeholder={language === 'rw' ? 'Sobanura video yawe...' : "Describe your video..."} rows={2}
+                  placeholder={t('describeVideo')} rows={2}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none bg-secondary border border-border" />
                 <div className="flex gap-3">
                   <input ref={fileInputRef} type="file" accept="video/*" className="hidden"
@@ -215,10 +237,10 @@ export default function IPLearning() {
                     className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground disabled:opacity-40 transition-all flex items-center justify-center gap-2"
                     style={{ background: 'linear-gradient(135deg, hsl(var(--sky)), hsl(200 80% 35%))' }}>
                     {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
-                    🚀 {language === 'rw' ? 'Sangiza' : 'Share'}
+                    🚀 {t('share')}
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground">⚠️ {language === 'rw' ? 'Video yawe irinzwe na copyright ©' : 'Your video is protected by copyright ©'} 🛡️</p>
+                <p className="text-xs text-muted-foreground">⚠️ {t('videoCopyright')} 🛡️</p>
               </div>
             </div>
 
@@ -232,7 +254,7 @@ export default function IPLearning() {
                 <div className="text-center py-8"><Loader2 className="w-6 h-6 mx-auto animate-spin text-muted-foreground" /></div>
               ) : communityVideos.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  {language === 'rw' ? 'Nta video ziraboneka. Banza ushyireho!' : 'No videos yet. Be the first to share!'}
+                  {t('noVideosYet')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -250,10 +272,20 @@ export default function IPLearning() {
                             <span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        <span className="text-[9px] px-2 py-0.5 rounded-full font-bold flex-shrink-0"
-                          style={{ background: 'hsl(var(--emerald) / 0.1)', color: 'hsl(var(--emerald))' }}>
-                          © Protected
-                        </span>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className="text-[9px] px-2 py-0.5 rounded-full font-bold"
+                            style={{ background: 'hsl(var(--emerald) / 0.1)', color: 'hsl(var(--emerald))' }}>
+                            © Protected
+                          </span>
+                          {v.user_id === user?.id && (
+                            <button
+                              onClick={() => handleDeleteVideo(v.id, v.video_url)}
+                              className="text-[10px] px-2 py-0.5 rounded-full font-medium transition-all hover:opacity-80"
+                              style={{ background: 'hsl(var(--alert) / 0.1)', color: 'hsl(var(--alert))' }}>
+                              🗑 Delete
+                            </button>
+                          )}
+                        </div>
                       </div>
                       {/* Playable video */}
                       <video src={v.video_url} controls className="w-full rounded-lg max-h-[300px]" preload="metadata" />
@@ -331,7 +363,7 @@ export default function IPLearning() {
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(var(--gold) / 0.3)' }}>
                   <button onClick={() => setShowReason(!showReason)} className="w-full px-4 py-3 flex items-center justify-between" style={{ background: 'hsl(var(--gold) / 0.1)' }}>
                     <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'hsl(var(--gold))' }}>
-                      <Lightbulb className="w-4 h-4" /> 💡 {language === 'rw' ? 'Kuki Ari Ngombwa?' : 'Why Does This Matter?'}
+                      <Lightbulb className="w-4 h-4" /> 💡 {t('whyMatters')}
                     </span>
                     <ChevronRight className="w-4 h-4" style={{ color: 'hsl(var(--gold))', transform: showReason ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
                   </button>
@@ -346,7 +378,7 @@ export default function IPLearning() {
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(var(--emerald) / 0.3)' }}>
                   <div className="px-4 py-2 flex items-center gap-2" style={{ background: 'hsl(var(--emerald) / 0.1)' }}>
                     <Star className="w-4 h-4" style={{ color: 'hsl(var(--emerald))' }} />
-                    <span className="text-sm font-semibold" style={{ color: 'hsl(var(--emerald))' }}>{language === 'rw' ? 'Urugero' : 'Example'}</span>
+                    <span className="text-sm font-semibold" style={{ color: 'hsl(var(--emerald))' }}>{t('example')}</span>
                   </div>
                   <div className="p-4 bg-secondary">
                     {lesson.example.split('\n').map((line, i) => (
@@ -357,7 +389,7 @@ export default function IPLearning() {
 
                 {/* Key Points */}
                 <div className="glass-card p-4">
-                  <h3 className="text-sm font-semibold mb-2">📝 {language === 'rw' ? 'Ingingo Ngenderwaho' : 'Key Points'}</h3>
+                  <h3 className="text-sm font-semibold mb-2">📝 {t('keyPoints')}</h3>
                   {lesson.keyPoints.map((kp, i) => (
                     <div key={i} className="flex items-start gap-2 mb-1">
                       <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--emerald))' }} />
@@ -407,7 +439,7 @@ export default function IPLearning() {
                       ) : (
                         <div className="text-center p-3 rounded-xl" style={{ background: quizPassed ? 'hsl(var(--emerald) / 0.1)' : 'hsl(var(--alert) / 0.1)' }}>
                           <p className="text-sm font-bold" style={{ color: quizPassed ? 'hsl(var(--emerald))' : 'hsl(var(--alert))' }}>
-                            {quizPassed ? `✅ ${language === 'rw' ? 'Watsindiye' : 'Passed'}! ${quizScore}/${lesson.quiz.length}` : `❌ ${language === 'rw' ? 'Ongera ugerageze' : 'Try again'}. ${quizScore}/${lesson.quiz.length}`}
+                            {quizPassed ? `✅ ${t('quizPassed')}! ${quizScore}/${lesson.quiz.length}` : `❌ ${t('tryAgain')}. ${quizScore}/${lesson.quiz.length}`}
                           </p>
                         </div>
                       )}
@@ -419,7 +451,7 @@ export default function IPLearning() {
                   {currentLesson > 0 && (
                     <button onClick={() => { setCurrentLesson(prev => prev - 1); setShowQuiz(false); setShowReason(false); setQuizAnswers({}); setQuizSubmitted(false); }}
                       className="px-4 py-3 rounded-xl text-sm font-medium bg-secondary border border-border">
-                      ← {language === 'rw' ? 'Inyuma' : 'Previous'}
+                      ← {t('previous')}
                     </button>
                   )}
                   <button onClick={markComplete}
