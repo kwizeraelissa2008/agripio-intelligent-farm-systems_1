@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard, Cpu, Bell, Settings, Globe, LogOut,
   Sparkles, BookOpen, ChevronDown, Leaf, TrendingUp,
-  Users, Shield, Trophy, Info
+  Shield, Trophy, Info
 } from 'lucide-react';
 import { Language, languageNames, languageFlags, TranslationKey } from '@/lib/translations';
 import NotificationPanel from './NotificationPanel';
@@ -24,7 +24,7 @@ const navItems: { path: string; icon: React.ElementType; tKey: string; emoji: st
 const allLanguages: Language[] = ['en', 'rw', 'fr', 'sw', 'lg', 'zu'];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { unreadCount, language, setLanguage, theme, toggleTheme, t } = useApp();
+  const { unreadCount, language, setLanguage, t } = useApp();
   const { profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -227,7 +227,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <footer className="flex-shrink-0 px-6 py-2.5 border-t text-center"
             style={{ borderColor: '#e6efe6', background: '#fff' }}>
             <p className="text-[11px] text-gray-400">
-              © 2026 AgriPio Team &nbsp;|&nbsp; Protected under Rwanda IP Law No. 31/2009 &nbsp;|&nbsp; ARIPO Member State
+              © 2026 AgriPio Team &nbsp;|&nbsp; 
             </p>
           </footer>
         )}
