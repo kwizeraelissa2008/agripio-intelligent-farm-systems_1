@@ -29,19 +29,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
   const { language } = useApp();
 
-  if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center animate-pulse"
-          style={{ background: 'var(--gradient-emerald)' }}>
-          <span className="text-white text-lg">🌱</span>
+  // Show loading only briefly to prevent indefinite loading states
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center animate-pulse"
+            style={{ background: 'var(--gradient-emerald)' }}>
+            <span className="text-white text-lg">🌱</span>
+          </div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
-        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!user) return <Navigate to="/auth" />;
+  // If no user after loading, redirect to auth
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   // Check EULA acceptance
   const eulaAccepted = localStorage.getItem(EULA_KEY(user.id)) === 'true';
