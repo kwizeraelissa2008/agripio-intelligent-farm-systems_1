@@ -9,10 +9,21 @@ export function useAuth() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
+    let mounted = true;
+    const loadingTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        setLoading(false);
+      }
+    }, 5000); // Force loading to complete after 5 seconds
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      clearTimeout(loadingTimeout);
+      
       if (session?.user) {
         // Defer profile fetch to avoid deadlock
         setTimeout(() => fetchProfile(session.user.id), 0);
@@ -22,13 +33,21 @@ export function useAuth() {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      clearTimeout(loadingTimeout);
+      
       if (session?.user) fetchProfile(session.user.id);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
   }, []);
 
   const fetchProfile = async (userId: string) => {
@@ -43,9 +62,9 @@ export function useAuth() {
     setProfile(null);
   };
 
-  const updateProfile = async (updates: Record<string, any>) => {
+  const updateProfile = async (updates: { [key: string]: any }) => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').update(updates).eq('user_id', user.id).select().single();
+    const { data } = await supabase.from('profiles').update(updates as any).eq('user_id', user.id).select().single();
     if (data) setProfile(data);
   };
 
